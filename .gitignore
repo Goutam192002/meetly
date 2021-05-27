@@ -1,0 +1,7 @@
+.idea/
+app/.idea/
+
+node_modules/
+app/node_modules/
+
+app/public/video.mkv
