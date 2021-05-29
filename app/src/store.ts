@@ -6,8 +6,11 @@ import {io} from "socket.io-client";
 import {emitEventMiddleWare, subscribeToEventsMiddleWare} from "./middlewares/socket";
 import {Device} from "mediasoup-client";
 import {mediasoup} from "./middlewares/mediasoup";
+import {enableMapSet} from "immer";
 
-const socket = io("http://localhost:8000/")
+enableMapSet();
+
+const socket = io("https://localhost:8000/")
 const device = new Device();
 
 const reducer = {

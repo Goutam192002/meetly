@@ -1,4 +1,4 @@
-import { createServer } from "http";
+import { createServer } from "https";
 import { Server, Socket } from "socket.io";
 import redis from "./lib/redis";
 import {MEETING, ONLINE_USERS, USERNAME} from "./constants/redis_keys";
@@ -10,12 +10,18 @@ import {Worker} from "mediasoup/lib/Worker";
 import Peer from "./entities/peer";
 import {DtlsParameters} from "mediasoup/lib/WebRtcTransport";
 import {MediaKind, RtpCapabilities, RtpParameters} from "mediasoup/lib/RtpParameters";
+import path from "path";
 
 let rooms: Map<string, Room> = new Map<string, Room>();
 let worker: Worker;
 
+const options = {
+    key: fs.readFileSync(path.join(__dirname, 'ssl/key.pem'), 'utf-8'),
+    cert: fs.readFileSync(path.join(__dirname, 'ssl/cert.pem'), 'utf-8')
+}
+
 const STATIC_PATH = __dirname + 'app/build';
-const httpServer = createServer(
+const httpServer = createServer(options,
     function (req, res) {
     fs.readFile(STATIC_PATH + req.url, function (err,data) {
         if (err) {
@@ -138,6 +144,6 @@ io.of("/").adapter.on("leave-room", (room, socketId) => {
 
 const port = process.env.PORT || 3000;
 httpServer.listen(port, async () => {
-    worker = await createWorker({ logLevel: "debug" });
+    worker = await createWorker({ logLevel: "debug", rtcMinPort: 10000, rtcMaxPort: 10100 });
     console.log(`Server is listening at ${port}`);
 });

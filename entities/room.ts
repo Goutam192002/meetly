@@ -5,7 +5,6 @@ import Peer from "./peer";
 import {DtlsParameters} from "mediasoup/lib/WebRtcTransport";
 import {MediaKind, RtpCapabilities, RtpParameters} from "mediasoup/lib/RtpParameters";
 import {events} from "../constants/events";
-import {getSupportedRtpCapabilities} from "mediasoup";
 
 class Room {
     readonly id: string;
@@ -17,54 +16,20 @@ class Room {
         const router = await worker.createRouter({
             mediaCodecs: [
                 {
-                    kind      : 'audio',
-                    mimeType  : 'audio/opus',
-                    clockRate : 48000,
-                    channels  : 2
+                    kind: 'audio',
+                    mimeType: 'audio/opus',
+                    clockRate: 48000,
+                    channels: 2
                 },
                 {
-                    kind       : 'video',
-                    mimeType   : 'video/VP8',
-                    clockRate  : 90000,
-                    parameters :
+                    kind: 'video',
+                    mimeType: 'video/VP8',
+                    clockRate: 90000,
+                    parameters:
                         {
-                            'x-google-start-bitrate' : 1000
+                            'x-google-start-bitrate': 1000
                         }
                 },
-                {
-                    kind       : 'video',
-                    mimeType   : 'video/VP9',
-                    clockRate  : 90000,
-                    parameters :
-                        {
-                            'profile-id'             : 2,
-                            'x-google-start-bitrate' : 1000
-                        }
-                },
-                {
-                    kind       : 'video',
-                    mimeType   : 'video/h264',
-                    clockRate  : 90000,
-                    parameters :
-                        {
-                            'packetization-mode'      : 1,
-                            'profile-level-id'        : '4d0032',
-                            'level-asymmetry-allowed' : 1,
-                            'x-google-start-bitrate'  : 1000
-                        }
-                },
-                {
-                    kind       : 'video',
-                    mimeType   : 'video/h264',
-                    clockRate  : 90000,
-                    parameters :
-                        {
-                            'packetization-mode'      : 1,
-                            'profile-level-id'        : '42e01f',
-                            'level-asymmetry-allowed' : 1,
-                            'x-google-start-bitrate'  : 1000
-                        }
-                }
             ]
         });
         return new Room(roomId, router, io);
@@ -82,15 +47,16 @@ class Room {
     }
 
     getProducerListForPeer() {
-        const producerList = [];
+        const producers = {};
         this.peers.forEach( peer => {
+            producers[peer.id] = [];
             peer.producers.forEach(producer => {
-                producerList.push({
+                producers[peer.id].push({
                     producer_id: producer.id
                 });
             });
         });
-        return producerList;
+        return producers;
     }
 
     getRtpCapabilities() {
@@ -99,8 +65,16 @@ class Room {
 
     async createWebTransport(socketId: string) {
         const transport = await this.router.createWebRtcTransport({
-            listenIps: ['127.0.0.1'],
+            listenIps: [{
+                ip: '0.0.0.0',
+                announcedIp: '127.0.0.1'
+            }],
+            enableUdp: true,
+            enableTcp: true,
+            preferTcp: true,
+            initialAvailableOutgoingBitrate: 1000000
         });
+        await transport.setMaxIncomingBitrate(1500000);
         this.peers.get(socketId).addTransport(transport);
         return {
             params: {

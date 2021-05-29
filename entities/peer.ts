@@ -49,7 +49,7 @@ class Peer {
         const consumer = await consumerTransport.consume({
             producerId: producerId,
             rtpCapabilities: rtpCapabilities,
-            paused: true
+            paused: false
         });
 
         this.consumers.set(consumer.id, consumer);

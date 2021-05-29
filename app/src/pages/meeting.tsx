@@ -39,11 +39,10 @@ const Meeting = () => {
     return (
         <div className="h-screen max-h-screen flex flex-wrap">
             <div className="flex-1 flex flex-col max-h-screen">
-                <div className="flex flex-row">
+                <div className="flex-1 flex flex-row">
                     {
-                        meeting.streams.map(stream => (
-                                <Video autoPlay={true} controls={true} playsInline={true} srcObject={stream} />
-                            )
+                        meeting.participants.map(participant =>
+                            meeting.streams.has(participant.socketId) && meeting.streams.get(participant.socketId)!!.map((stream) => (<Video autoPlay={true} controls={true} playsInline={true} srcObject={stream} />))
                         )
                     }
                 </div>

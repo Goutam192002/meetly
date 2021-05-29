@@ -48,7 +48,14 @@ const meetingSlice = createSlice({
         produce(state, action) {},
 
         addStream(state, action) {
-            state.streams.push(action.payload);
+            const { participant, stream } = action.payload
+            if (!state.streams.has(participant) && !stream) {
+                state.streams.set(participant, []);
+            } else if(stream) {
+                state.streams.set(participant, [stream]);
+            } else {
+                state.streams.get(participant)!!.push(stream);
+            }
         }
     }
 });
