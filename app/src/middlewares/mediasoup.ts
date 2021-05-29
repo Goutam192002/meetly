@@ -56,6 +56,10 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             const producer = await sendTransport.produce({
                 track: stream.getVideoTracks()[0],
+                codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
+                codecOptions : {
+                    videoGoogleStartBitrate : 1000
+                }
             });
         });
     }
