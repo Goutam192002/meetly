@@ -99,10 +99,7 @@ class Room {
 
     async createWebTransport(socketId: string) {
         const transport = await this.router.createWebRtcTransport({
-            listenIps: [{
-                ip: '0.0.0.0',
-                announcedIp: '127.0.0.1'
-            }],
+            listenIps: ['127.0.0.1'],
         });
         this.peers.get(socketId).addTransport(transport);
         return {
