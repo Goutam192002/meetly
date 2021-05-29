@@ -11,7 +11,8 @@ export const EmptyMeeting: Meeting = {
     status: MeetingStatus.NONE,
     id: '',
     participants: [],
-    messages: []
+    messages: [],
+    streams: [],
 }
 
 export default interface Meeting {
@@ -19,6 +20,7 @@ export default interface Meeting {
     id: string;
     participants: any[];
     messages: any[];
+    streams: MediaStream[];
 }
 
 export interface JoinMeetingPayload {

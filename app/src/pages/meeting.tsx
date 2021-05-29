@@ -1,10 +1,11 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {createElement, useContext, useEffect, useState} from "react";
 import MeetingSidebar from "../components/MeetingSidebar";
 import {RootState} from "../store";
 import {useDispatch, useSelector} from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import { getParticipants } from "../slices/meeting";
+import {getParticipants, produce} from "../slices/meeting";
 import {events} from "../constants/events";
+import Video from "../components/Video";
 
 const getMeeting = (state: RootState) => state.meeting
 
@@ -25,7 +26,8 @@ const Meeting = () => {
         } else {
             dispatch(
                 getParticipants({
-                    socket: { event_name: events.GET_PARTICIPANTS, args: [meeting.id] }
+                    event_name: events.GET_PARTICIPANTS,
+                    meeting_id: meeting.id
                 })
             );
         }
@@ -37,8 +39,14 @@ const Meeting = () => {
     return (
         <div className="h-screen max-h-screen flex flex-wrap">
             <div className="flex-1 flex flex-col max-h-screen">
-                <video src="/video.mkv" controls={true} autoPlay={true}
-                       className="flex-1 flex-grow object-center object-cover"/>
+                <div className="flex flex-row">
+                    {
+                        meeting.streams.map(stream => (
+                                <Video autoPlay={true} controls={true} playsInline={true} srcObject={stream} />
+                            )
+                        )
+                    }
+                </div>
                 <div className="flex flex-row justify-center gap-x-3 py-4 bg-white-400">
                     <button className="bg-white rounded-full shadow-xl p-4 focus:outline-none">
                         <img src="/mic_off.svg"/>

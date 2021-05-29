@@ -2,17 +2,9 @@ import {Socket} from "socket.io-client";
 import {events} from "../constants/events";
 import {Dispatch} from "react";
 import {addParticipant, joinMeeting, newMessage, removeParticipant, setParticipants} from '../slices/meeting';
-import {useToasts} from "react-toast-notifications";
 import { show } from "../slices/toast";
 
 const eventHandler: any = {};
-eventHandler[events.JOIN_MEETING] = (dispatch: Dispatch<any>) => {
-    dispatch(joinMeeting())
-}
-
-eventHandler[events.GET_PARTICIPANTS] = (dispatch: Dispatch<any>, participants: any[]) => {
-    dispatch(setParticipants(participants))
-}
 
 eventHandler[events.NEW_PARTICIPANT] = (dispatch: Dispatch<any>, participant: any) => {
     dispatch(addParticipant(participant));
@@ -28,8 +20,23 @@ eventHandler[events.NEW_MESSAGE] = (dispatch: Dispatch<any>, message: any) => {
 }
 
 const emitEventMiddleWare = (socket: Socket) => (store: any) => (next: any) => (action: any) => {
-    if (action.payload && action.payload.socket) {
-        socket.emit(action.payload.socket.event_name, ...action.payload.socket.args);
+    const { dispatch } = store;
+    switch (action.type) {
+        case 'meeting/requestToJoinMeeting':
+            socket.emit(events.REQUEST_JOIN, action.payload.meeting_id, action.payload.name, (response: any) => {
+                dispatch(joinMeeting());
+            });
+            break;
+        case 'meeting/sendMessage':
+            socket.emit(events.SEND_MESSAGE, action.payload.meeting_id, action.payload.message);
+            break;
+        case 'meeting/getParticipants':
+            socket.emit(events.GET_PARTICIPANTS, action.payload.meeting_id, (participants: any[]) => {
+                dispatch(setParticipants(participants));
+            });
+            break;
+        default:
+            break;
     }
     return next(action);
 }

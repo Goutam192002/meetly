@@ -7,7 +7,14 @@ enum events {
     NEW_MESSAGE = 'meeting:chat',
     GET_PARTICIPANTS = 'meeting:iq:participants',
     NEW_PARTICIPANT = 'meeting:participants:new',
-    PARTICIPANT_OFFLINE = 'meeting:participants:offline'
+    PARTICIPANT_OFFLINE = 'meeting:participants:offline',
+    GET_ROUTER_CAPABILITIES = 'router:capabilities',
+    CREATE_WEBRTC_TRANSPORT = 'transports:create:webrtc',
+    CONNECT_TRANSPORT = 'transports:connect',
+    PRODUCE = 'transports:produce',
+    CONSUME = 'transports:consume',
+    GET_PRODUCERS = 'producers:get',
+
 }
 
 export {events}

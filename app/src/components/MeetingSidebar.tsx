@@ -32,10 +32,9 @@ const MeetingSidebar = ({isMobile, isOpen, toggleSidebar, tab='participants'}: {
         if (message) {
             dispatch(
                 sendMessage({
-                    socket: {
-                        event_name: events.SEND_MESSAGE,
-                        args: [meetingId, message]
-                    }
+                    event_name: events.SEND_MESSAGE,
+                    meeting_id: meetingId,
+                    message: message
                 })
             );
             setMessage('');

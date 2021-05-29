@@ -1,5 +1,5 @@
 import {Action, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import Meeting, {EmptyMeeting, JoinMeetingPayload, MeetingStatus, SocketPayload} from "../interfaces/meeting";
+import Meeting, {EmptyMeeting, MeetingStatus} from "../interfaces/meeting";
 
 const initialState: Meeting = EmptyMeeting
 
@@ -7,9 +7,9 @@ const meetingSlice = createSlice({
     name: 'meeting',
     initialState,
     reducers: {
-        requestToJoinMeeting(state: Meeting, action: PayloadAction<SocketPayload<JoinMeetingPayload>>) {
+        requestToJoinMeeting(state: Meeting, action: PayloadAction<any>) {
             state.status = MeetingStatus.REQUEST_TO_JOIN;
-            state.id = action.payload.socket.args[0];
+            state.id = action.payload.meeting_id;
         },
 
         joinMeeting(state: Meeting, action: Action) {
@@ -37,12 +37,18 @@ const meetingSlice = createSlice({
         sendMessage(state, action) {
             state.messages.push({
                 name: 'You',
-                message: action.payload.socket.args[1]
+                message: action.payload.message
             });
         },
 
         newMessage(state, action) {
             state.messages.push(action.payload);
+        },
+
+        produce(state, action) {},
+
+        addStream(state, action) {
+            state.streams.push(action.payload);
         }
     }
 });
@@ -50,13 +56,15 @@ const meetingSlice = createSlice({
 export const {
     joinMeeting,
     leaveMeeting,
+    produce,
     requestToJoinMeeting,
     getParticipants,
     setParticipants,
     addParticipant,
     removeParticipant,
     newMessage,
-    sendMessage
+    sendMessage,
+    addStream,
 } = meetingSlice.actions;
 export default meetingSlice.reducer;
 
