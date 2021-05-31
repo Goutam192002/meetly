@@ -20,7 +20,7 @@ const Meeting = () => {
     useEffect(() => {
         window.addEventListener('resize', handleWindowSizeChange);
         if (!meeting.id) {
-            history.push(`/?mid=${id}`);
+            history.replace(`/?mid=${id}`);
         }
         return () => {
             window.removeEventListener('resize', handleWindowSizeChange);
