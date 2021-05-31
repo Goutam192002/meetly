@@ -47,14 +47,17 @@ class Room {
     }
 
     getProducerListForPeer() {
-        const producers = {};
+        const producers = [];
         this.peers.forEach( peer => {
-            producers[peer.id] = [];
+            const participant = {
+                name: peer.name,
+                id: peer.id,
+                producers: {}
+            };
             peer.producers.forEach(producer => {
-                producers[peer.id].push({
-                    producer_id: producer.id
-                });
+                participant.producers[producer.kind] = producer.id;
             });
+            producers.push(participant);
         });
         return producers;
     }
@@ -126,8 +129,8 @@ class Room {
     }
 
     broadCast(socketId: string, event: events, data: any) {
-        for (const socket of Array.from(this.peers.keys()).filter(id => id !== socketId)) {
-            this.io.to(socketId).emit(event, data);
+        for (const socket of Array.from(this.peers.keys())) {
+            this.io.to(socket).emit(event, data);
         }
     }
 

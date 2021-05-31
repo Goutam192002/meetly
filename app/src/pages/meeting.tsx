@@ -1,11 +1,10 @@
-import React, {createElement, useContext, useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import MeetingSidebar from "../components/MeetingSidebar";
 import {RootState} from "../store";
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
-import {getParticipants, produce} from "../slices/meeting";
-import {events} from "../constants/events";
 import Video from "../components/Video";
+import {Participant} from "../interfaces/meeting";
 
 const getMeeting = (state: RootState) => state.meeting
 
@@ -15,7 +14,6 @@ const Meeting = () => {
     const { id } = useParams<{id: string}>();
     const meeting = useSelector(getMeeting);
     const history = useHistory();
-    const dispatch = useDispatch();
 
     const handleWindowSizeChange = () => setIsMobile(window.innerWidth <= 768);
 
@@ -23,13 +21,6 @@ const Meeting = () => {
         window.addEventListener('resize', handleWindowSizeChange);
         if (!meeting.id) {
             history.push(`/?mid=${id}`);
-        } else {
-            dispatch(
-                getParticipants({
-                    event_name: events.GET_PARTICIPANTS,
-                    meeting_id: meeting.id
-                })
-            );
         }
         return () => {
             window.removeEventListener('resize', handleWindowSizeChange);
@@ -41,9 +32,9 @@ const Meeting = () => {
             <div className="flex-1 flex flex-col max-h-screen">
                 <div className="flex-1 flex flex-row">
                     {
-                        meeting.participants.map(participant =>
-                            meeting.streams.has(participant.socketId) && meeting.streams.get(participant.socketId)!!.map((stream) => (<Video autoPlay={true} controls={true} playsInline={true} srcObject={stream} />))
-                        )
+                        meeting.participants.map((participant: Participant) => {
+                            return participant.stream && (<Video autoPlay={true} playsInline={true} srcObject={participant.stream} />)
+                        })
                     }
                 </div>
                 <div className="flex flex-row justify-center gap-x-3 py-4 bg-white-400">

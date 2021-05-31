@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useEffect, useRef, useState} from "react";
+import React, {ChangeEvent, useEffect, useLayoutEffect, useRef, useState} from "react";
 import {v4} from "uuid";
 import { useAppDispatch as useDispatch } from "../hooks";
 import {joinMeeting, requestToJoinMeeting} from "../slices/meeting";
@@ -28,7 +28,7 @@ const NewMeeting = () => {
         }
     });
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         navigator.mediaDevices.getUserMedia({
             video: true,
             audio: true,

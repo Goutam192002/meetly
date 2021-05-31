@@ -1,13 +1,29 @@
 import {Socket} from "socket.io-client";
 import {events} from "../constants/events";
 import {Dispatch} from "react";
-import {addParticipant, joinMeeting, newMessage, removeParticipant, setParticipants} from '../slices/meeting';
+import {
+    addParticipant,
+    joinMeeting,
+    newMessage, newProducer,
+    removeParticipant,
+    setParticipants
+} from '../slices/meeting';
 import { show } from "../slices/toast";
 
 const eventHandler: any = {};
 
+eventHandler[events.NEW_PRODUCER] = (dispatch: Dispatch<any>, data: any) => {
+    dispatch(newProducer(data));
+}
+
 eventHandler[events.NEW_PARTICIPANT] = (dispatch: Dispatch<any>, participant: any) => {
-    dispatch(addParticipant(participant));
+    dispatch(
+        addParticipant({
+            name: participant.name,
+            id: participant.id,
+            stream: null
+        })
+    );
     dispatch(show(`${participant.name} has joined the meeting`));
 }
 

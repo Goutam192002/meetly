@@ -31,7 +31,7 @@ const meetingSlice = createSlice({
         },
 
         removeParticipant(state, action) {
-            state.participants = state.participants.filter(participant => participant.socketId !== action.payload);
+            state.participants = state.participants.filter(participant => participant.id !== action.payload);
         },
 
         sendMessage(state, action) {
@@ -47,14 +47,13 @@ const meetingSlice = createSlice({
 
         produce(state, action) {},
 
-        addStream(state, action) {
-            const { participant, stream } = action.payload
-            if (!state.streams.has(participant) && !stream) {
-                state.streams.set(participant, []);
-            } else if(stream) {
-                state.streams.set(participant, [stream]);
-            } else {
-                state.streams.get(participant)!!.push(stream);
+        newProducer(state, action) {
+            const { stream, socket_id } = action.payload;
+            for (const idx in state.participants) {
+                if (state.participants[idx].id === socket_id) {
+                    state.participants[idx].stream = stream;
+                    break;
+                }
             }
         }
     }
@@ -71,7 +70,7 @@ export const {
     removeParticipant,
     newMessage,
     sendMessage,
-    addStream,
+    newProducer,
 } = meetingSlice.actions;
 export default meetingSlice.reducer;
 

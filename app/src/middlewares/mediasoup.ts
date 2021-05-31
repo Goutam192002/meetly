@@ -3,7 +3,8 @@ import {Device} from "mediasoup-client";
 import {events} from "../constants/events";
 import {RtpCapabilities} from "mediasoup-client/lib/RtpParameters";
 import {Transport, TransportOptions} from "mediasoup-client/lib/Transport";
-import {addStream} from "../slices/meeting";
+import {addParticipant, setParticipants} from "../slices/meeting";
+import {Participant} from "../interfaces/meeting";
 
 let sendTransport: Transport;
 let receiveTransport: Transport;
@@ -36,32 +37,37 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                     socket.emit(events.CONNECT_TRANSPORT, meetingId, receiveTransport.id, dtlsParameters, callback);
                 });
 
-                socket.emit(events.GET_PRODUCERS, meetingId, (streams: any) => {
-                    for (let participant in streams) {
-                        if (streams.hasOwnProperty(participant)) {
-                            let producers = streams[participant];
-                            if (producers.length === 0) {
-                                store.dispatch(addStream({ participant, stream: null }));
+                socket.emit(events.GET_PARTICIPANTS, meetingId, (participants: any) => {
+                    const state: Participant[] = [];
+                    for (let index in participants) {
+                        if (participants.hasOwnProperty(index)) {
+                            const item: Participant = {
+                                name: participants[index].name,
+                                id: participants[index].id,
+                                stream: null
                             }
-                            producers.forEach( (producer: any) => {
-                                socket.emit(events.CONSUME, meetingId, receiveTransport.id, producer.producer_id, device.rtpCapabilities, async ({ id, kind, rtpParameters}: any) => {
+                            let participant = participants[index];
+                            const stream: MediaStream = new MediaStream();
+                            Object.keys(participant.producers).map((mediaKind: string) => {
+                                socket.emit(events.CONSUME, meetingId, receiveTransport.id, participant.producers[mediaKind], device.rtpCapabilities, async ({ id, kind, rtpParameters}: any) => {
                                     const consumer = await receiveTransport.consume({
                                         id,
-                                        producerId: producer.producer_id,
+                                        producerId: participant.producers[mediaKind],
                                         kind,
                                         rtpParameters,
                                     });
-                                    const stream: MediaStream = new MediaStream();
                                     stream.addTrack(consumer.track);
-                                    store.dispatch(addStream({ participant, stream }));
                                 })
-                            })
+                            });
+                            item.stream = stream;
+                            state.push(item);
                         }
                     }
+                    store.dispatch(setParticipants(state));
                 });
             })
 
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             const producer = await sendTransport.produce({
                 track: stream.getVideoTracks()[0],
                 codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
@@ -69,7 +75,28 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                     videoGoogleStartBitrate : 1000
                 }
             });
+            const audioProducer = await sendTransport.produce({
+                track: stream.getAudioTracks()[0],
+                codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
+            });
         });
+    } else if (action.type === 'meeting/newProducer') {
+        const { producer_id, socket_id } = action.payload;
+        const { participants, id } = store.getState().meeting;
+
+        const stream = participants.filter((participant: Participant) => participant.id === socket_id)[0].stream || new MediaStream();
+
+        socket.emit(events.CONSUME, id, receiveTransport.id, producer_id, device.rtpCapabilities, async ({ id, kind, rtpParameters}: any) => {
+            const consumer = await receiveTransport.consume({
+                id,
+                producerId: producer_id,
+                kind,
+                rtpParameters,
+            });
+            stream.addTrack(consumer.track);
+        });
+
+        action.payload.stream = stream;
     }
     return next(action);
 }

@@ -57,7 +57,7 @@ const MeetingSidebar = ({isMobile, isOpen, toggleSidebar, tab='participants'}: {
                 activeTab === 'participants' && participants.length ? (
                     <div className="flex-1 overflow-y-scroll p-2">
                         {
-                            participants.map( participant => <div className="p-4" id={participant.socketId}>{participant.name}</div>)
+                            participants.map( participant => <div className="p-4" id={participant.id}>{participant.name}</div>)
                         }
                     </div>
                 ) : (

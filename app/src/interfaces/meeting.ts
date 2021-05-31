@@ -12,13 +12,17 @@ export const EmptyMeeting: Meeting = {
     id: '',
     participants: [],
     messages: [],
-    streams: new Map<string, MediaStream[]>(),
 }
 
 export default interface Meeting {
     status: MeetingStatus;
     id: string;
-    participants: any[];
+    participants: Participant[];
     messages: any[];
-    streams: Map<string, MediaStream[]>;
+}
+
+export interface Participant {
+    name: string;
+    id: string;
+    stream: MediaStream|null
 }
