@@ -31,7 +31,7 @@ class Peer {
     async createProducer(producerTransportId: string, rtpParameters: RtpParameters, kind: MediaKind) {
         const producer = await this.transports.get(producerTransportId).produce({
             kind: kind,
-            rtpParameters: rtpParameters
+            rtpParameters: rtpParameters,
         });
 
         this.producers.set(producer.id, producer);
@@ -49,7 +49,6 @@ class Peer {
         const consumer = await consumerTransport.consume({
             producerId: producerId,
             rtpCapabilities: rtpCapabilities,
-            paused: false
         });
 
         this.consumers.set(consumer.id, consumer);
