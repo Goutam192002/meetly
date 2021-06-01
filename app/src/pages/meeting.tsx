@@ -29,8 +29,8 @@ const Meeting = () => {
 
     return (
         <div className="h-screen max-h-screen flex flex-wrap">
-            <div className="flex-1 flex flex-col max-h-screen">
-                <div className="flex-1 flex flex-row">
+            <div className="flex-1 flex flex-col max-h-full">
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 grid-rows-1 sm:grid-rows-2 gap-4">
                     {
                         meeting.participants.map((participant: Participant) => {
                             return participant.stream && (<Video autoPlay={true} playsInline={true} srcObject={participant.stream} />)
