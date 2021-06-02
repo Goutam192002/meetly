@@ -93,6 +93,18 @@ io.on("connection", async (socket: Socket) => {
         callback(producer_id);
     });
 
+    socket.on(events.PAUSE_PRODUCER, async (meeting_id: string, producer_id: string, callback: () => void) => {
+        const producer = roomsMap.get(meeting_id).peers.get(socket.id).getProducer(producer_id);
+        await producer.pause();
+        callback();
+    });
+
+    socket.on(events.RESUME_PRODUCER, async (meeting_id: string, producer_id: string, callback: () => void) => {
+        const producer = roomsMap.get(meeting_id).peers.get(socket.id).getProducer(producer_id);
+        await producer.resume();
+        callback();
+    });
+
     socket.on(events.CONSUME, async (meeting_id: string, consumer_transport_id: string, producer_id: string, rtpCapabilities: RtpCapabilities, callback: (data) => any) => {
         const params = await roomsMap.get(meeting_id).consume(socket.id, consumer_transport_id, producer_id, rtpCapabilities);
         callback(params);

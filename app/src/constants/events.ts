@@ -14,7 +14,9 @@ enum events {
     PRODUCE = 'transports:produce',
     CONSUME = 'transports:consume',
     GET_PRODUCERS = 'producers:get',
-    NEW_PRODUCER = 'producers:new'
+    NEW_PRODUCER = 'producers:new',
+    RESUME_PRODUCER = 'producers:resume',
+    PAUSE_PRODUCER = 'producers:pause',
 }
 
 export {events}
