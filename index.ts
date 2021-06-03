@@ -1,4 +1,4 @@
-import { createServer } from "https";
+import { createServer } from "http";
 import { Server, Socket } from "socket.io";
 import redis from "./lib/redis";
 import {MEETING, ONLINE_USERS, USERNAME} from "./constants/redis_keys";
@@ -10,18 +10,12 @@ import {Worker} from "mediasoup/lib/Worker";
 import Peer from "./entities/peer";
 import {DtlsParameters} from "mediasoup/lib/WebRtcTransport";
 import {MediaKind, RtpCapabilities, RtpParameters} from "mediasoup/lib/RtpParameters";
-import path from "path";
 
 let roomsMap: Map<string, Room> = new Map<string, Room>();
 let worker: Worker;
 
-const options = {
-    key: fs.readFileSync(process.env.SSL_KEY || path.join(__dirname, 'ssl/key.pem'), 'utf-8'),
-    cert: fs.readFileSync(process.env.SSL_CERT || path.join(__dirname, 'ssl/cert.pem'), 'utf-8')
-}
-
 const STATIC_PATH = __dirname + 'app/build';
-const httpServer = createServer(options,
+const httpServer = createServer({},
     function (req, res) {
     fs.readFile(STATIC_PATH + req.url, function (err,data) {
         if (err) {

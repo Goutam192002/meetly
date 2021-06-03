@@ -10,7 +10,7 @@ import {enableMapSet} from "immer";
 
 enableMapSet();
 
-const address = process.env.SOCKET_ADDRESS || "https://localhost:8000/"
+const address = process.env.SOCKET_ADDRESS || "https://meetly.goutambseervi.tech/"
 const socket = io(address);
 const device = new Device();
 
