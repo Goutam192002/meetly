@@ -10,6 +10,8 @@ const meetingSlice = createSlice({
         requestToJoinMeeting(state: Meeting, action: PayloadAction<any>) {
             state.status = MeetingStatus.REQUEST_TO_JOIN;
             state.id = action.payload.meeting_id;
+            state.self.videoEnabled = action.payload.video;
+            state.self.audioEnabled = action.payload.audio;
         },
 
         joinMeeting(state: Meeting, action: Action) {

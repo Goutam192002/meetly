@@ -1,13 +1,13 @@
-import React, {ChangeEvent, useEffect, useLayoutEffect, useRef, useState} from "react";
+import React, {ChangeEvent, useEffect, useLayoutEffect, useState} from "react";
 import {v4} from "uuid";
 import { useAppDispatch as useDispatch } from "../hooks";
-import {joinMeeting, requestToJoinMeeting} from "../slices/meeting";
+import {requestToJoinMeeting} from "../slices/meeting";
 import {events} from "../constants/events";
 import {RootState} from "../store";
 import {useSelector} from "react-redux";
 import {MeetingStatus} from "../interfaces/meeting";
+import {show} from "../slices/toast";
 import { useHistory, useLocation } from "react-router-dom";
-import {detectDevice, Device} from "mediasoup-client";
 
 const getMeeting = (state: RootState) => state.meeting;
 
@@ -29,10 +29,16 @@ const NewMeeting = () => {
     });
 
     useLayoutEffect(() => {
-        navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: true,
-        }).then(stream => videoRef!!.srcObject = stream);
+        navigator.mediaDevices.getUserMedia({ video: true }).then(async stream => {
+            if(stream) {
+                videoRef!!.srcObject = stream
+            }
+        }).catch(async error => {
+            setVideo(false);
+        });
+        navigator.mediaDevices.getUserMedia({ audio: true }).catch(async error => {
+            setAudio(false);
+        })
     }, []);
 
     const onNameChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -47,6 +53,8 @@ const NewMeeting = () => {
                 event_name: events.REQUEST_JOIN,
                 meeting_id: meetingId,
                 name: name,
+                audio: audio,
+                video: video,
             })
         );
     }
@@ -55,9 +63,17 @@ const NewMeeting = () => {
         <div className="container h-screen max-h-screen mx-auto px-4 py-8">
             <div className="flex flex-col h-full sm:flex-row sm:space-x-16">
                 <div className="flex-1 relative w-full max-w-screen-sm">
-                    <video className="absolute h-full object-cover object-center rounded-xl" ref={ref => videoRef = ref}  autoPlay={true} playsInline={true} />
+                    { video ? (<video className="absolute h-full object-cover object-center rounded-xl" ref={ref => videoRef = ref}  autoPlay={true} playsInline={true} />) : (<div className="absolute bg-black w-full h-full" />)}
                     <div className="absolute z-50 w-full h-full flex flex-row gap-x-2 justify-center items-end py-3">
-                        <button className={`rounded-full ${!audio ? 'bg-white': ''} border-2 p-3 focus:outline-none`} onClick={() => setAudio(!audio)}>
+                        <button className={`rounded-full ${!audio ? 'bg-white': ''} border-2 p-3 focus:outline-none`} onClick={() => {
+                            navigator.mediaDevices.enumerateDevices().then(devices => {
+                                if (!devices.filter(device => device.kind === 'audioinput').length) {
+                                    dispatch(show('No audio devices found.'));
+                                } else {
+                                    setAudio(!audio);
+                                }
+                            })
+                        }}>
                             {
                                 audio ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" enableBackground="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><g><rect fill="none" height="24" width="24"/><rect fill="none" height="24" width="24"/><rect fill="none" height="24" width="24"/></g><g><g/><g><path d="M12,14c1.66,0,3-1.34,3-3V5c0-1.66-1.34-3-3-3S9,3.34,9,5v6C9,12.66,10.34,14,12,14z"/><path d="M17,11c0,2.76-2.24,5-5,5s-5-2.24-5-5H5c0,3.53,2.61,6.43,6,6.92V21h2v-3.08c3.39-0.49,6-3.39,6-6.92H17z"/></g></g></svg>
@@ -66,7 +82,15 @@ const NewMeeting = () => {
                                 )
                             }
                         </button>
-                        <button className={`rounded-full ${!video ? 'bg-white': ''} border-2 p-3 focus:outline-none`} onClick={() => setVideo(!video)}>
+                        <button className={`rounded-full ${!video ? 'bg-white': ''} border-2 p-3 focus:outline-none`} onClick={() => {
+                            navigator.mediaDevices.enumerateDevices().then(devices => {
+                                if (!devices.filter(device => device.kind === 'videoinput').length) {
+                                    dispatch(show('No video devices found.'));
+                                } else {
+                                    setVideo(!video);
+                                }
+                            })
+                        }}>
                             {
                                 video ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4V7c0-.55-.45-1-1-1z"/></svg>

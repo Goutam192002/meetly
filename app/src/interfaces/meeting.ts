@@ -12,17 +12,29 @@ export const EmptyMeeting: Meeting = {
     id: '',
     participants: [],
     messages: [],
+    self: {
+        audioEnabled: false,
+        videoEnabled: false
+    }
 }
 
 export default interface Meeting {
+    self: SelfStatus;
     status: MeetingStatus;
     id: string;
     participants: Participant[];
     messages: any[];
 }
 
+interface SelfStatus {
+    audioEnabled: boolean;
+    videoEnabled: boolean;
+}
+
 export interface Participant {
     name: string;
     id: string;
-    stream: MediaStream|null
+    stream: MediaStream|null;
+    audioEnabled?: boolean;
+    videoEnabled?: boolean;
 }

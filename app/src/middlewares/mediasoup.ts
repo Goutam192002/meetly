@@ -7,6 +7,7 @@ import {setParticipants} from "../slices/meeting";
 import {Participant} from "../interfaces/meeting";
 import {Producer} from "mediasoup-client/lib/Producer";
 import store from "../store";
+import {Consumer} from "mediasoup-client/lib/Consumer";
 
 let sendTransport: Transport;
 let receiveTransport: Transport;
@@ -15,7 +16,11 @@ let audioProducer: Producer;
 let videoProducer: Producer;
 
 const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any) => async (action: any) => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const { audioEnabled, videoEnabled } = store.getState().meeting.self;
+    let stream: MediaStream|null;
+    if (audioEnabled || videoEnabled) {
+        stream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: audioEnabled});
+    }
 
     switch (action.type) {
         case 'meeting/joinMeeting':
@@ -52,18 +57,26 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                                 const item: Participant = {
                                     name: participants[index].name,
                                     id: participants[index].id,
-                                    stream: null
+                                    stream: null,
+                                    audioEnabled: false,
+                                    videoEnabled: false,
                                 }
                                 let participant = participants[index];
                                 const stream: MediaStream = new MediaStream();
                                 Object.keys(participant.producers).map((mediaKind: string) => {
                                     socket.emit(events.CONSUME, meetingId, receiveTransport.id, participant.producers[mediaKind], device.rtpCapabilities, async ({ id, kind, rtpParameters}: any) => {
-                                        const consumer = await receiveTransport.consume({
+                                        const consumer: Consumer = await receiveTransport.consume({
                                             id,
                                             producerId: participant.producers[mediaKind],
                                             kind,
                                             rtpParameters,
                                         });
+                                        if (consumer.kind === 'video') {
+                                            item.videoEnabled = !consumer.paused;
+                                        }
+                                        if (consumer.kind == 'audio') {
+                                            item.audioEnabled = !consumer.paused;
+                                        }
                                         stream.addTrack(consumer.track);
                                     })
                                 });
@@ -75,17 +88,21 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                     });
                 })
 
-                videoProducer = await sendTransport.produce({
-                    track: stream.getVideoTracks()[0],
-                    codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
-                    codecOptions : {
-                        videoGoogleStartBitrate : 1000
-                    },
-                });
-                audioProducer = await sendTransport.produce({
-                    track: stream.getAudioTracks()[0],
-                    codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
-                });
+                if (videoEnabled) {
+                    videoProducer = await sendTransport.produce({
+                        track: stream!!.getVideoTracks()[0],
+                        codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
+                        codecOptions : {
+                            videoGoogleStartBitrate : 1000
+                        },
+                    });
+                }
+                if (audioEnabled) {
+                    audioProducer = await sendTransport.produce({
+                        track: stream!!.getAudioTracks()[0],
+                        codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
+                    });
+                }
             });
             break;
         case 'meeting/newProducer':
@@ -112,7 +129,7 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
         case 'meeting/unmuteMic':
             if (!audioProducer) {
                 audioProducer = await sendTransport.produce({
-                    track: stream.getAudioTracks()[0],
+                    track: stream!!.getAudioTracks()[0],
                     codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
                 });
             }
@@ -124,7 +141,7 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
         case 'meeting/videoOn':
             if (!videoProducer) {
                 videoProducer = await sendTransport.produce({
-                    track: stream.getVideoTracks()[0],
+                    track: stream!!.getVideoTracks()[0],
                     codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
                     codecOptions : {
                         videoGoogleStartBitrate : 1000

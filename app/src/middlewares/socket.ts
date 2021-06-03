@@ -21,7 +21,9 @@ eventHandler[events.NEW_PARTICIPANT] = (dispatch: Dispatch<any>, participant: an
         addParticipant({
             name: participant.name,
             id: participant.id,
-            stream: null
+            stream: null,
+            audioEnabled: false,
+            videoEnabled: false,
         })
     );
     dispatch(show(`${participant.name} has joined the meeting`));
