@@ -1,7 +1,7 @@
 import {Socket} from "socket.io-client";
 import {Device} from "mediasoup-client";
 import {events} from "../constants/events";
-import {RtpCapabilities} from "mediasoup-client/lib/RtpParameters";
+import {MediaKind, RtpCapabilities} from "mediasoup-client/lib/RtpParameters";
 import {Transport, TransportOptions} from "mediasoup-client/lib/Transport";
 import {setParticipants} from "../slices/meeting";
 import {Participant} from "../interfaces/meeting";
@@ -41,6 +41,22 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                             callback(producerId);
                         })
                     });
+
+                    if (videoEnabled) {
+                        videoProducer = await sendTransport.produce({
+                            track: stream!!.getVideoTracks()[0],
+                            codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
+                            codecOptions : {
+                                videoGoogleStartBitrate : 1000
+                            },
+                        });
+                    }
+                    if (audioEnabled) {
+                        audioProducer = await sendTransport.produce({
+                            track: stream!!.getAudioTracks()[0],
+                            codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
+                        });
+                    }
                 });
 
                 socket.emit(events.CREATE_WEBRTC_TRANSPORT, meetingId, async (params: TransportOptions) => {
@@ -50,7 +66,7 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                         socket.emit(events.CONNECT_TRANSPORT, meetingId, receiveTransport.id, dtlsParameters, callback);
                     });
 
-                    socket.emit(events.GET_PARTICIPANTS, meetingId, (participants: any) => {
+                    socket.emit(events.GET_PARTICIPANTS, meetingId, async (participants: any) => {
                         const state: Participant[] = [];
                         for (let index in participants) {
                             if (participants.hasOwnProperty(index)) {
@@ -63,23 +79,12 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                                 }
                                 let participant = participants[index];
                                 const stream: MediaStream = new MediaStream();
-                                Object.keys(participant.producers).map((mediaKind: string) => {
-                                    socket.emit(events.CONSUME, meetingId, receiveTransport.id, participant.producers[mediaKind], device.rtpCapabilities, async ({ id, kind, rtpParameters}: any) => {
-                                        const consumer: Consumer = await receiveTransport.consume({
-                                            id,
-                                            producerId: participant.producers[mediaKind],
-                                            kind,
-                                            rtpParameters,
-                                        });
-                                        if (consumer.kind === 'video') {
-                                            item.videoEnabled = !consumer.paused;
-                                        }
-                                        if (consumer.kind == 'audio') {
-                                            item.audioEnabled = !consumer.paused;
-                                        }
-                                        stream.addTrack(consumer.track);
-                                    })
-                                });
+                                for (const mediaKind of Object.keys(participant.producers)) {
+                                    const {paused, track} = await consumeParticipant(socket, meetingId, participant.producers[mediaKind], device.rtpCapabilities) as any;
+                                    item.videoEnabled = mediaKind == 'video' ? !paused : item.videoEnabled;
+                                    item.audioEnabled = mediaKind == 'audio' ? !paused : item.audioEnabled;
+                                    stream.addTrack(track);
+                                }
                                 item.stream = stream;
                                 state.push(item);
                             }
@@ -87,22 +92,6 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                         store.dispatch(setParticipants(state));
                     });
                 })
-
-                if (videoEnabled) {
-                    videoProducer = await sendTransport.produce({
-                        track: stream!!.getVideoTracks()[0],
-                        codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
-                        codecOptions : {
-                            videoGoogleStartBitrate : 1000
-                        },
-                    });
-                }
-                if (audioEnabled) {
-                    audioProducer = await sendTransport.produce({
-                        track: stream!!.getAudioTracks()[0],
-                        codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
-                    });
-                }
             });
             break;
         case 'meeting/newProducer':
@@ -111,15 +100,13 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
 
             const remoteStream = participants.filter((participant: Participant) => participant.id === socket_id)[0].stream || new MediaStream();
 
-            socket.emit(events.CONSUME, id, receiveTransport.id, producer_id, device.rtpCapabilities, async ({ id, kind, rtpParameters}: any) => {
-                const consumer = await receiveTransport.consume({
-                    id,
-                    producerId: producer_id,
-                    kind,
-                    rtpParameters,
-                });
-                remoteStream.addTrack(consumer.track);
-            });
+            const { paused, track, kind } = await consumeParticipant(socket, id, producer_id, device.rtpCapabilities) as any;
+            if (kind === 'video') {
+                action.payload.videoEnabled = !paused;
+            } else if (kind === 'audio') {
+                action.payload.audioEnabled = !paused;
+            }
+            remoteStream.addTrack(track);
 
             action.payload.stream = remoteStream;
             break;
@@ -172,6 +159,24 @@ const resumeProducer = (producer: Producer, socket: Socket) => {
         socket.emit(events.RESUME_PRODUCER, id, producer.id, () => {
             producer.resume();
             resolve(true);
+        });
+    });
+}
+
+const consumeParticipant = (socket: Socket, meetingId: string, producerId: string, rtpCapabilities: RtpCapabilities) => {
+    return new Promise(resolve => {
+        socket.emit(events.CONSUME, meetingId, receiveTransport.id, producerId, rtpCapabilities, async ({id, kind, rtpParameters}: any) => {
+            const consumer: Consumer = await receiveTransport.consume({
+                id,
+                producerId: producerId,
+                kind,
+                rtpParameters,
+            });
+            resolve({
+                paused: consumer.paused,
+                track: consumer.track,
+                kind: kind,
+            })
         });
     });
 }

@@ -50,9 +50,11 @@ const meetingSlice = createSlice({
         produce(state, action) {},
 
         newProducer(state, action) {
-            const { stream, socket_id } = action.payload;
+            const { stream, socket_id, audioEnabled, videoEnabled } = action.payload;
             for (const idx in state.participants) {
                 if (state.participants[idx].id === socket_id) {
+                    state.participants[idx].audioEnabled = audioEnabled || state.participants[idx].audioEnabled;
+                    state.participants[idx].videoEnabled = videoEnabled || state.participants[idx].videoEnabled;
                     state.participants[idx].stream = stream;
                     break;
                 }

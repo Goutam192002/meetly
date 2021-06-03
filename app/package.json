@@ -24,7 +24,7 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "export HTTPS=true&&SSL_CRT_FILE=ssl/cert.pem&&SSL_KEY_FILE=ssl/key.pem craco start",
+    "start": "craco start",
     "build": "craco build",
     "test": "craco test",
     "eject": "react-scripts eject"
