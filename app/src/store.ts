@@ -10,7 +10,8 @@ import {enableMapSet} from "immer";
 
 enableMapSet();
 
-const socket = io("https://localhost:8000/")
+const address = process.env.SOCKET_ADDRESS || "https://localhost:8000/"
+const socket = io(address);
 const device = new Device();
 
 const reducer = {

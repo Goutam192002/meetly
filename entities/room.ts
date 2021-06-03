@@ -70,7 +70,7 @@ class Room {
         const transport = await this.router.createWebRtcTransport({
             listenIps: [{
                 ip: '0.0.0.0',
-                announcedIp: '127.0.0.1'
+                announcedIp: process.env.PUBLIC_IP || '127.0.0.1'
             }],
             enableUdp: true,
             enableTcp: true,

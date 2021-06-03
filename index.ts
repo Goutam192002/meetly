@@ -16,8 +16,8 @@ let roomsMap: Map<string, Room> = new Map<string, Room>();
 let worker: Worker;
 
 const options = {
-    key: fs.readFileSync(path.join(__dirname, 'ssl/key.pem'), 'utf-8'),
-    cert: fs.readFileSync(path.join(__dirname, 'ssl/cert.pem'), 'utf-8')
+    key: fs.readFileSync(process.env.SSL_KEY || path.join(__dirname, 'ssl/key.pem'), 'utf-8'),
+    cert: fs.readFileSync(process.env.SSL_CERT || path.join(__dirname, 'ssl/cert.pem'), 'utf-8')
 }
 
 const STATIC_PATH = __dirname + 'app/build';
@@ -151,6 +151,6 @@ io.of("/").adapter.on("leave-room", (room, socketId) => {
 
 const port = process.env.PORT || 3000;
 httpServer.listen(port, async () => {
-    worker = await createWorker({ logLevel: "debug", rtcMinPort: 10000, rtcMaxPort: 10100 });
+    worker = await createWorker({ logLevel: "debug" });
     console.log(`Server is listening at ${port}`);
 });
