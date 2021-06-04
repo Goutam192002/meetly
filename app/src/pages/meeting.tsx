@@ -39,9 +39,9 @@ const Meeting = () => {
 
     const toggleVideo = () => {
         if (meeting.self.videoEnabled) {
-            dispatch(videoOn());
-        } else {
             dispatch(videoOff());
+        } else {
+            dispatch(videoOn());
         }
     }
 

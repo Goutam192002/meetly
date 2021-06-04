@@ -15,10 +15,20 @@ let receiveTransport: Transport;
 let audioProducer: Producer;
 let videoProducer: Producer;
 
+let canProduceAudio: boolean = false;
+let canProduceVideo: boolean = false;
+
+navigator.mediaDevices.enumerateDevices().then((devices: MediaDeviceInfo[]) => {
+    devices.forEach(device => {
+        canProduceAudio = device.kind === 'audioinput' ? true : canProduceAudio;
+        canProduceVideo = device.kind === 'videoinput' ? true : canProduceVideo;
+    })
+})
+
 const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any) => async (action: any) => {
     const { audioEnabled, videoEnabled } = store.getState().meeting.self;
     let stream: MediaStream|null = null;
-    if (audioEnabled || videoEnabled) {
+    if (canProduceVideo || canProduceAudio) {
         stream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: audioEnabled});
     }
 
@@ -116,7 +126,7 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
             }
             break;
         case 'meeting/unmuteMic':
-            if (device.canProduce('audio')) {
+            if (canProduceAudio) {
                 if (!audioProducer) {
                     audioProducer = await sendTransport.produce({
                         track: stream!!.getAudioTracks()[0],
@@ -132,7 +142,7 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
             }
             break;
         case 'meeting/videoOn':
-            if (device.canProduce('video')) {
+            if (canProduceVideo) {
                 if (!videoProducer) {
                     videoProducer = await sendTransport.produce({
                         track: stream!!.getVideoTracks()[0],
@@ -180,6 +190,12 @@ const consumeParticipant = (socket: Socket, meetingId: string, producerId: strin
                 kind,
                 rtpParameters,
             });
+            consumer.observer.on("pause", () => {
+                console.log(`${consumer.id} paused`);
+            });
+            consumer.observer.on("resume", () => {
+                console.log(`${consumer.id} resumed`);
+            })
             resolve({
                 paused: consumer.paused,
                 track: consumer.track,
