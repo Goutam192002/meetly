@@ -42,7 +42,7 @@ const emitEventMiddleWare = (socket: Socket) => (store: any) => (next: any) => (
     switch (action.type) {
         case 'meeting/requestToJoinMeeting':
             socket.emit(events.REQUEST_JOIN, action.payload.meeting_id, action.payload.name, (response: any) => {
-                dispatch(joinMeeting());
+                dispatch(joinMeeting(socket.id));
             });
             break;
         case 'meeting/sendMessage':

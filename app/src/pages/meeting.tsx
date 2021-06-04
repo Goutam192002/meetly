@@ -32,14 +32,17 @@ const Meeting = () => {
             <div className="flex-1 flex flex-col max-h-full">
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 grid-rows-1 sm:grid-rows-2 gap-4">
                     {
-                        meeting.participants.map((participant: Participant) => (
-                            <div className="relative">
-                                {participant.videoEnabled ? (<Video className="absolute" autoPlay={true} playsInline={true} srcObject={participant.stream!!} />) : (
-                                    <div className="absolute w-full h-full bg-black" />
-                                )}
-                                <div className="absolute w-full h-full">
+                        meeting.participants.map((participant: Participant) => {
+                            return participant.id !== meeting.self.id && (
+                                <div className="relative">
+                                    {participant.videoEnabled ? (
+                                        <Video className="absolute" autoPlay={true} playsInline={true}
+                                               srcObject={participant.stream!!}/>) : (
+                                        <div className="absolute w-full h-full bg-black"/>
+                                    )}
+                                    <div className="absolute w-full h-full">
                                     <span className="absolute left-0 bottom-0 m-2">
-                                        { participant.audioEnabled ? (
+                                        {participant.audioEnabled ? (
                                             <svg xmlns="http://www.w3.org/2000/svg" enableBackground="new 0 0 24 24"
                                                  height="24px" viewBox="0 0 24 24" width="24px" fill="#FFFFFF">
                                                 <g>
@@ -59,7 +62,8 @@ const Meeting = () => {
                                             </svg>
                                         ) : (
                                             <div className="bg-red-600 rounded-full w-full h-full p-2">
-                                                <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 0 24 24"
+                                                <svg xmlns="http://www.w3.org/2000/svg" height="18px"
+                                                     viewBox="0 0 24 24"
                                                      width="18px" fill="#FFFFFF">
                                                     <path d="M0 0h24v24H0V0z" fill="none"/>
                                                     <path
@@ -69,10 +73,11 @@ const Meeting = () => {
                                         )
                                         }
                                     </span>
-                                    <p className="absolute right-0 bottom-0 text-white m-2">{participant.name}</p>
+                                        <p className="absolute right-0 bottom-0 text-white m-2">{participant.name}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))
+                            )
+                        })
                     }
                 </div>
                 <div className="flex flex-row justify-center gap-x-3 py-4 bg-white-400">

@@ -14,7 +14,8 @@ const meetingSlice = createSlice({
             state.self.audioEnabled = action.payload.audio;
         },
 
-        joinMeeting(state: Meeting, action: Action) {
+        joinMeeting(state: Meeting, action: PayloadAction<string>) {
+            state.self.id = action.payload;
             state.status = MeetingStatus.IN_MEETING;
         },
 

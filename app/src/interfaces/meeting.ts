@@ -1,5 +1,3 @@
-import {events} from "../constants/events";
-
 export enum MeetingStatus {
     NONE='',
     REQUEST_TO_JOIN = 'request_to_join',
@@ -13,6 +11,7 @@ export const EmptyMeeting: Meeting = {
     participants: [],
     messages: [],
     self: {
+        id: '',
         audioEnabled: false,
         videoEnabled: false
     }
@@ -27,6 +26,7 @@ export default interface Meeting {
 }
 
 interface SelfStatus {
+    id: string;
     audioEnabled: boolean;
     videoEnabled: boolean;
 }
