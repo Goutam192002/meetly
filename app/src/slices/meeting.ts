@@ -60,6 +60,22 @@ const meetingSlice = createSlice({
                     break;
                 }
             }
+        },
+
+        muteMic(state, action: Action) {
+            state.self.audioEnabled = false
+        },
+
+        unmuteMic(state, action: Action) {
+            state.self.audioEnabled = true
+        },
+
+        videoOff(state, action: Action) {
+            state.self.videoEnabled = false
+        },
+
+        videoOn(state, action: Action) {
+            state.self.videoEnabled = true
         }
     }
 });
@@ -76,6 +92,10 @@ export const {
     newMessage,
     sendMessage,
     newProducer,
+    muteMic,
+    unmuteMic,
+    videoOff,
+    videoOn
 } = meetingSlice.actions;
 export default meetingSlice.reducer;
 

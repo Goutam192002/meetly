@@ -17,7 +17,7 @@ let videoProducer: Producer;
 
 const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any) => async (action: any) => {
     const { audioEnabled, videoEnabled } = store.getState().meeting.self;
-    let stream: MediaStream|null;
+    let stream: MediaStream|null = null;
     if (audioEnabled || videoEnabled) {
         stream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: audioEnabled});
     }
@@ -111,31 +111,39 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
             action.payload.stream = remoteStream;
             break;
         case 'meeting/muteMic':
-            await pauseProducer(audioProducer, socket);
+            if (audioProducer) {
+                await pauseProducer(audioProducer, socket);
+            }
             break;
         case 'meeting/unmuteMic':
-            if (!audioProducer) {
-                audioProducer = await sendTransport.produce({
-                    track: stream!!.getAudioTracks()[0],
-                    codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
-                });
+            if (device.canProduce('audio')) {
+                if (!audioProducer) {
+                    audioProducer = await sendTransport.produce({
+                        track: stream!!.getAudioTracks()[0],
+                        codec: device.rtpCapabilities.codecs?.find((codec) => codec.kind === 'audio')
+                    });
+                }
+                await resumeProducer(audioProducer, socket);
             }
-            await resumeProducer(audioProducer, socket);
             break;
         case 'meeting/videoOff':
-            await pauseProducer(videoProducer, socket);
+            if (videoProducer) {
+                await pauseProducer(videoProducer, socket);
+            }
             break;
         case 'meeting/videoOn':
-            if (!videoProducer) {
-                videoProducer = await sendTransport.produce({
-                    track: stream!!.getVideoTracks()[0],
-                    codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
-                    codecOptions : {
-                        videoGoogleStartBitrate : 1000
-                    },
-                });
+            if (device.canProduce('video')) {
+                if (!videoProducer) {
+                    videoProducer = await sendTransport.produce({
+                        track: stream!!.getVideoTracks()[0],
+                        codec: device.rtpCapabilities.codecs?.find((codec) => codec.mimeType.toLocaleLowerCase() === 'video/h264'),
+                        codecOptions : {
+                            videoGoogleStartBitrate : 1000
+                        },
+                    });
+                }
+                await resumeProducer(videoProducer, socket);
             }
-            await resumeProducer(videoProducer, socket);
             break;
         default:
             break;

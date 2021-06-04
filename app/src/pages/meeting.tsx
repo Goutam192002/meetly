@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from "react";
 import MeetingSidebar from "../components/MeetingSidebar";
 import {RootState} from "../store";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import Video from "../components/Video";
-import {Participant} from "../interfaces/meeting";
+import {default as MeetingInterface, Participant} from "../interfaces/meeting";
+import {muteMic, unmuteMic, videoOff, videoOn} from "../slices/meeting";
 
 const getMeeting = (state: RootState) => state.meeting
 
@@ -12,8 +13,9 @@ const Meeting = () => {
     const [isOpen, setOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
     const { id } = useParams<{id: string}>();
-    const meeting = useSelector(getMeeting);
+    const meeting: MeetingInterface = useSelector(getMeeting);
     const history = useHistory();
+    const dispatch = useDispatch();
 
     const handleWindowSizeChange = () => setIsMobile(window.innerWidth <= 768);
 
@@ -26,6 +28,22 @@ const Meeting = () => {
             window.removeEventListener('resize', handleWindowSizeChange);
         }
     }, []);
+
+    const toggleAudio = () => {
+        if (meeting.self.audioEnabled) {
+            dispatch(muteMic());
+        } else {
+            dispatch(unmuteMic())
+        }
+    }
+
+    const toggleVideo = () => {
+        if (meeting.self.videoEnabled) {
+            dispatch(videoOn());
+        } else {
+            dispatch(videoOff());
+        }
+    }
 
     return (
         <div className="h-screen max-h-screen flex flex-wrap">
@@ -81,11 +99,15 @@ const Meeting = () => {
                     }
                 </div>
                 <div className="flex flex-row justify-center gap-x-3 py-4 bg-white-400">
-                    <button className="bg-white rounded-full shadow-xl p-4 focus:outline-none">
-                        <img src="/mic_off.svg"/>
+                    <button className="bg-white rounded-full shadow-xl p-4 focus:outline-none" onClick={toggleAudio}>
+                        {
+                            meeting.self.audioEnabled ? (<img src="/mic_on.svg" />) : (<img src="/mic_off.svg"/>)
+                        }
                     </button>
-                    <button className="bg-white rounded-full shadow-xl p-4 focus:outline-none">
-                        <img src="/videocam_off.svg"/>
+                    <button className="bg-white rounded-full shadow-xl p-4 focus:outline-none" onClick={toggleVideo}>
+                        {
+                            meeting.self.videoEnabled ? (<img src="/videocam_on.svg" />) : (<img src="/videocam_off.svg"/>)
+                        }
                     </button>
                     {
                         isMobile && (
