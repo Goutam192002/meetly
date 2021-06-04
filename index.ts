@@ -14,19 +14,8 @@ import {MediaKind, RtpCapabilities, RtpParameters} from "mediasoup/lib/RtpParame
 let roomsMap: Map<string, Room> = new Map<string, Room>();
 let worker: Worker;
 
-const STATIC_PATH = __dirname + '/app/build';
-const httpServer = createServer({},
-    function (req, res) {
-    fs.readFile(STATIC_PATH + req.url, function (err,data) {
-        if (err) {
-            res.writeHead(404);
-            res.end(JSON.stringify(err));
-            return;
-        }
-        res.writeHead(200);
-        res.end(data);
-    });
-});
+const httpServer = createServer({});
+
 const io = new Server(httpServer, {
     cors: {
         origin: "*"
