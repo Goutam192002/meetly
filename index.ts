@@ -14,7 +14,7 @@ import {MediaKind, RtpCapabilities, RtpParameters} from "mediasoup/lib/RtpParame
 let roomsMap: Map<string, Room> = new Map<string, Room>();
 let worker: Worker;
 
-const STATIC_PATH = __dirname + 'app/build';
+const STATIC_PATH = __dirname + '/app/build';
 const httpServer = createServer({},
     function (req, res) {
     fs.readFile(STATIC_PATH + req.url, function (err,data) {
