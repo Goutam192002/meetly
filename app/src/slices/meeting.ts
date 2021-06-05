@@ -76,6 +76,22 @@ const meetingSlice = createSlice({
 
         videoOn(state, action: Action) {
             state.self.videoEnabled = true
+        },
+
+        resumeConsumer(state, action: PayloadAction<any>) {
+            const idx = state.participants.findIndex(participant => participant.id === action.payload.participant_id);
+            if (idx > -1) {
+                state.participants[idx].videoEnabled = action.payload.kind === 'video' ? true : state.participants[idx].videoEnabled;
+                state.participants[idx].audioEnabled = action.payload.kind === 'audio' ? true : state.participants[idx].audioEnabled;
+            }
+        },
+
+        pauseConsumer(state, action: PayloadAction<any>) {
+            const idx = state.participants.findIndex(participant => participant.id === action.payload.participant_id);
+            if (idx > -1) {
+                state.participants[idx].videoEnabled = action.payload.kind === 'video' ? false : state.participants[idx].videoEnabled;
+                state.participants[idx].audioEnabled = action.payload.kind === 'audio' ? false : state.participants[idx].audioEnabled;
+            }
         }
     }
 });
@@ -95,7 +111,9 @@ export const {
     muteMic,
     unmuteMic,
     videoOff,
-    videoOn
+    videoOn,
+    pauseConsumer,
+    resumeConsumer,
 } = meetingSlice.actions;
 export default meetingSlice.reducer;
 

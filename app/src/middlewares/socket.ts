@@ -6,7 +6,9 @@ import {
     joinMeeting,
     newMessage, newProducer,
     removeParticipant,
-    setParticipants
+    setParticipants,
+    resumeConsumer,
+    pauseConsumer,
 } from '../slices/meeting';
 import { show } from "../slices/toast";
 
@@ -35,6 +37,14 @@ eventHandler[events.PARTICIPANT_OFFLINE] = (dispatch: Dispatch<any>, participant
 
 eventHandler[events.NEW_MESSAGE] = (dispatch: Dispatch<any>, message: any) => {
     dispatch(newMessage(message));
+}
+
+eventHandler[events.PAUSE_CONSUMER] = (dispatch: Dispatch<any>, message: any) => {
+    dispatch(pauseConsumer(message));
+}
+
+eventHandler[events.RESUME_CONSUMER] = (dispatch: Dispatch<any>, message: any) => {
+    dispatch(resumeConsumer(message));
 }
 
 const emitEventMiddleWare = (socket: Socket) => (store: any) => (next: any) => (action: any) => {

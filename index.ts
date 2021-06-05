@@ -77,14 +77,24 @@ io.on("connection", async (socket: Socket) => {
     });
 
     socket.on(events.PAUSE_PRODUCER, async (meeting_id: string, producer_id: string, callback: () => void) => {
-        const producer = roomsMap.get(meeting_id).peers.get(socket.id).getProducer(producer_id);
+        const room = roomsMap.get(meeting_id);
+        const producer = room.peers.get(socket.id).getProducer(producer_id);
         await producer.pause();
+        room.broadCast(socket.id, events.PAUSE_CONSUMER, {
+            participant_id: socket.id,
+            kind: producer.kind
+        });
         callback();
     });
 
     socket.on(events.RESUME_PRODUCER, async (meeting_id: string, producer_id: string, callback: () => void) => {
-        const producer = roomsMap.get(meeting_id).peers.get(socket.id).getProducer(producer_id);
+        const room = roomsMap.get(meeting_id);
+        const producer = room.peers.get(socket.id).getProducer(producer_id);
         await producer.resume();
+        room.broadCast(socket.id, events.RESUME_CONSUMER, {
+            participantId: socket.id,
+            kind: producer.kind
+        });
         callback();
     });
 

@@ -17,6 +17,8 @@ enum events {
     NEW_PRODUCER = 'producers:new',
     RESUME_PRODUCER = 'producers:resume',
     PAUSE_PRODUCER = 'producers:pause',
+    PAUSE_CONSUMER = 'consumers:pause',
+    RESUME_CONSUMER = 'consumers:resume'
 }
 
 export {events}

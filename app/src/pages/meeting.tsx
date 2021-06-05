@@ -55,7 +55,7 @@ const Meeting = () => {
                             return participant.id !== meeting.self.id && (
                                 <div className="relative">
                                     {participant.videoEnabled ? (
-                                        <Video className="absolute" autoPlay={true} playsInline={true}
+                                        <Video className="absolute" muted={!participant.audioEnabled} autoPlay={true} playsInline={true}
                                                srcObject={participant.stream!!}/>) : (
                                         <div className="absolute w-full h-full bg-black"/>
                                     )}
