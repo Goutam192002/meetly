@@ -92,7 +92,7 @@ io.on("connection", async (socket: Socket) => {
         const producer = room.peers.get(socket.id).getProducer(producer_id);
         await producer.resume();
         room.broadCast(socket.id, events.RESUME_CONSUMER, {
-            participantId: socket.id,
+            participant_id: socket.id,
             kind: producer.kind
         });
         callback();
