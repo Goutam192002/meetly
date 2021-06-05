@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from "react";
 import MeetingSidebar from "../components/MeetingSidebar";
 import {RootState} from "../store";
-import {useDispatch, useSelector} from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
+import {useSelector} from "react-redux";
+import {useHistory, useParams} from "react-router-dom";
 import Video from "../components/Video";
 import {default as MeetingInterface, Participant} from "../interfaces/meeting";
 import {muteMic, unmuteMic, videoOff, videoOn} from "../slices/meeting";
+import {useAppDispatch as useDispatch} from "../hooks";
 
 const getMeeting = (state: RootState) => state.meeting
 

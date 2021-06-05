@@ -28,7 +28,7 @@ navigator.mediaDevices.enumerateDevices().then((devices: MediaDeviceInfo[]) => {
 const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any) => async (action: any) => {
     const { audioEnabled, videoEnabled } = store.getState().meeting.self;
     let stream: MediaStream|null = null;
-    if (canProduceVideo || canProduceAudio) {
+    if (audioEnabled || videoEnabled) {
         stream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: audioEnabled});
     }
 

@@ -29,17 +29,17 @@ const NewMeeting = () => {
     });
 
     useLayoutEffect(() => {
-        navigator.mediaDevices.getUserMedia({ video: true }).then(async stream => {
+        navigator.mediaDevices.getUserMedia({ video: video }).then(async stream => {
             if(stream) {
                 videoRef!!.srcObject = stream
             }
         }).catch(async error => {
             setVideo(false);
         });
-        navigator.mediaDevices.getUserMedia({ audio: true }).catch(async error => {
+        navigator.mediaDevices.getUserMedia({ audio: audio }).catch(async error => {
             setAudio(false);
         })
-    }, []);
+    }, [audio, video]);
 
     const onNameChange = (event: ChangeEvent<HTMLInputElement>) => {
         setName(event.currentTarget.value);
