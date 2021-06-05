@@ -190,12 +190,6 @@ const consumeParticipant = (socket: Socket, meetingId: string, producerId: strin
                 kind,
                 rtpParameters,
             });
-            consumer.observer.on("pause", () => {
-                console.log(`${consumer.id} paused`);
-            });
-            consumer.observer.on("resume", () => {
-                console.log(`${consumer.id} resumed`);
-            })
             resolve({
                 paused: consumer.paused,
                 track: consumer.track,
