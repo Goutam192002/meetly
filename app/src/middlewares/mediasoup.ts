@@ -48,7 +48,7 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
 
                     sendTransport.on("produce", async ({ kind, rtpParameters, appData }, callback, err) => {
                         socket.emit(events.PRODUCE, meetingId, kind, rtpParameters, sendTransport.id, (producerId: string) => {
-                            callback(producerId);
+                            callback({ id: producerId });
                         })
                     });
 

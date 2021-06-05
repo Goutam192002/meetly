@@ -84,7 +84,6 @@ io.on("connection", async (socket: Socket) => {
 
     socket.on(events.RESUME_PRODUCER, async (meeting_id: string, producer_id: string, callback: () => void) => {
         const producer = roomsMap.get(meeting_id).peers.get(socket.id).getProducer(producer_id);
-        console.log(roomsMap.get(meeting_id).peers.get(socket.id).producers);
         await producer.resume();
         callback();
     });
