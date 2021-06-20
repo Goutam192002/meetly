@@ -155,6 +155,12 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
                 await resumeProducer(videoProducer, socket);
             }
             break;
+        case 'meeting/leaveMeeting':
+            sendTransport.close();
+            receiveTransport.close();
+            const { history } = action.payload;
+            history.replace('/');
+            break;
         default:
             break;
     }

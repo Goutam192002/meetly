@@ -24,7 +24,7 @@ const NewMeeting = () => {
 
     useEffect(() => {
         if (meeting.status === MeetingStatus.IN_MEETING) {
-            history.push(`/meeting/${meeting.id}`);
+            history.replace(`/meeting/${meeting.id}`);
         }
     });
 

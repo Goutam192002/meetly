@@ -3,7 +3,7 @@ import React from "react";
 import {Participant} from "../interfaces/meeting";
 
 const ParticipantVideo = ({ participant, size, forceMute=false, showMuteStatus=true }: { participant: Participant, size: string, forceMute?: boolean, showMuteStatus?: boolean }) => (
-    <div className={`relative w-${size} h-${size}`}>
+    <div className={`relative ${size}`}>
         {participant.videoEnabled ? (
             <Video className="absolute h-full w-full position-center object-cover" muted={forceMute || !participant.audioEnabled} autoPlay={true} playsInline={true}
                    srcObject={participant.stream!!}/>) : (

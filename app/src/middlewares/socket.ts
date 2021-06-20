@@ -63,6 +63,9 @@ const emitEventMiddleWare = (socket: Socket) => (store: any) => (next: any) => (
                 dispatch(setParticipants(participants));
             });
             break;
+        case 'meeting/leaveMeeting':
+            socket.emit(events.LEAVE_MEETING, action.payload.meeting_id);
+            break;
         default:
             break;
     }

@@ -20,7 +20,14 @@ const meetingSlice = createSlice({
         },
 
         leaveMeeting(state, action) {
-            state = EmptyMeeting;
+            state.id = '';
+            state.participants = [];
+            state.self = {
+                id: '',
+                audioEnabled: false,
+                videoEnabled: false
+            };
+            state.status = MeetingStatus.NONE;
         },
 
         getParticipants(state, action) {},

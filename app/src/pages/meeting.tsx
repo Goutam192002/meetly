@@ -3,9 +3,8 @@ import MeetingSidebar from "../components/MeetingSidebar";
 import {RootState} from "../store";
 import {useSelector} from "react-redux";
 import {useHistory, useParams} from "react-router-dom";
-import Video from "../components/Video";
-import {default as MeetingInterface, Participant} from "../interfaces/meeting";
-import {muteMic, unmuteMic, videoOff, videoOn} from "../slices/meeting";
+import {default as MeetingInterface, MeetingStatus, Participant} from "../interfaces/meeting";
+import {leaveMeeting, muteMic, unmuteMic, videoOff, videoOn} from "../slices/meeting";
 import {useAppDispatch as useDispatch} from "../hooks";
 import ParticipantVideo from "../components/ParticipantVideo";
 
@@ -59,14 +58,14 @@ const Meeting = () => {
                             meeting.participants.map((participant: Participant, index: number) => {
                                 return (
                                     <div onClick={setActive(index)} className={`rounded ${activeIndex === index ? 'border-4 border-green-500': ''}`}>
-                                        <ParticipantVideo participant={participant} size="20" forceMute={true} showMuteStatus={false} />
+                                        <ParticipantVideo participant={participant} size="w-20 h-20" forceMute={activeIndex === index} showMuteStatus={false} />
                                     </div>
                                 )
                             })
                         }
                     </div>
                     <div className="flex-1 p-2">
-                        <ParticipantVideo participant={meeting.participants[activeIndex]} size="full" />
+                        <ParticipantVideo participant={meeting.participants[activeIndex]} forceMute={meeting.participants[activeIndex].id === meeting.self.id} size="w-full h-full" />
                     </div>
                     <div className="flex flex-row justify-center gap-x-3 py-4 bg-white-400">
                         <button className="bg-white rounded-full shadow-xl p-4 focus:outline-none" onClick={toggleAudio}>
@@ -76,7 +75,7 @@ const Meeting = () => {
                         </button>
                         <button className="bg-white rounded-full shadow-xl p-4 focus:outline-none" onClick={toggleVideo}>
                             {
-                                meeting.self.videoEnabled ? (<img src="/videocam_on.svg" />) : (<img src="/videocam_off.svg"/>)
+                                meeting.self.videoEnabled ? (<img src="/video_on.svg" />) : (<img src="/videocam_off.svg"/>)
                             }
                         </button>
                         {
@@ -86,7 +85,7 @@ const Meeting = () => {
                                 </button>
                             )
                         }
-                        <button className="bg-red-600 rounded-full shadow-xl p-4 focus:outline-none">
+                        <button className="bg-red-600 rounded-full shadow-xl p-4 focus:outline-none" onClick={() => dispatch(leaveMeeting({ meeting_id: meeting.id, history: history }))}>
                             <img src="/call_end.svg" className="text-white"/>
                         </button>
                     </div>

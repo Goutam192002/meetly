@@ -19,7 +19,7 @@ const Toast = () => {
     }, [toast.status]);
 
     return (
-        <div className="w-full flex flex-row justify-center fixed py-2 px-8 z-30">
+        <div className={`w-full flex flex-row justify-center fixed py-2 px-8 ${toast.status === ToastStatus.SHOW ? 'z-30' : ''}`}>
             <div className={`rounded bg-green-200 px-6 py-4 ${toast.status === ToastStatus.SHOW ? '': 'invisible'}`}>{toast.message}</div>
         </div>
     );
