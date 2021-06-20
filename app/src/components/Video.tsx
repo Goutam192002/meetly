@@ -13,8 +13,6 @@ export default function Video({ srcObject, ...props }: PropsType) {
     }, [srcObject])
 
     return (
-        <div>
-            <video ref={refVideo} {...props} />
-        </div>
+        <video ref={refVideo} {...props} />
     );
 }

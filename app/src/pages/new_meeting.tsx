@@ -63,7 +63,7 @@ const NewMeeting = () => {
         <div className="container h-screen max-h-screen mx-auto px-4 py-8">
             <div className="flex flex-col h-full sm:flex-row sm:space-x-16">
                 <div className="flex-1 relative w-full max-w-screen-sm">
-                    { video ? (<video className="absolute h-full object-cover object-center rounded-xl" ref={ref => videoRef = ref}  autoPlay={true} playsInline={true} />) : (<div className="absolute bg-black w-full h-full" />)}
+                    { video ? (<video className="absolute min-w-full h-full object-cover object-center rounded-xl" ref={ref => videoRef = ref}  autoPlay={true} playsInline={true} />) : (<div className="absolute bg-black w-full h-full" />)}
                     <div className="absolute z-50 w-full h-full flex flex-row gap-x-2 justify-center items-end py-3">
                         <button className={`rounded-full ${!audio ? 'bg-white': ''} border-2 p-3 focus:outline-none`} onClick={() => {
                             navigator.mediaDevices.enumerateDevices().then(devices => {

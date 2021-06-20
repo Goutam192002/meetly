@@ -49,13 +49,24 @@ const Meeting = () => {
     return (
         <div className="h-screen max-h-screen flex flex-wrap">
             <div className="flex-1 flex flex-col max-h-full">
+                <div className="flex flex-row flex-nowrap">
+                    {
+                        meeting.participants.map((participant: Participant) => {
+                            return participant.id !== meeting.self.id && (
+                                participant.videoEnabled ? (
+                                    <Video srcObject={participant.stream!!} muted={true} className="inline w-40 h-40"/>
+                                ) : (<div className="bg-black inline w-40 h-40" />)
+                            )
+                        })
+                    }
+                </div>
                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 grid-rows-1 sm:grid-rows-2 gap-4">
                     {
                         meeting.participants.map((participant: Participant) => {
                             return participant.id !== meeting.self.id && (
                                 <div className="relative">
                                     {participant.videoEnabled ? (
-                                        <Video className="absolute" muted={!participant.audioEnabled} autoPlay={true} playsInline={true}
+                                        <Video className="absolute h-full w-full position-center object-cover" muted={!participant.audioEnabled} autoPlay={true} playsInline={true}
                                                srcObject={participant.stream!!}/>) : (
                                         <div className="absolute w-full h-full bg-black"/>
                                     )}
