@@ -1,5 +1,7 @@
 ## meetly - Yet another video conferencing app
 
+Check out the demo - https://meetly.goutambseervi.tech/
+
 ### What are you using?
 Frontend - React/Redux
 Backend - Node.js (Typescript)
