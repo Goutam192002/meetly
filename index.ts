@@ -129,6 +129,10 @@ io.on("connection", async (socket: Socket) => {
 });
 
 io.of("/").adapter.on("join-room", async (room, socketId) => {
+    if (room === socketId) {
+        return;
+    }
+
     const name = await redis.get(USERNAME(socketId));
 
     io.to(room).emit(events.NEW_PARTICIPANT, {
