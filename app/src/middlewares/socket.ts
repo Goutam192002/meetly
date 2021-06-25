@@ -12,40 +12,6 @@ import {
 } from '../slices/meeting';
 import { show } from "../slices/toast";
 
-const eventHandler: any = {};
-
-eventHandler[events.NEW_PRODUCER] = (dispatch: Dispatch<any>, data: any) => {
-    dispatch(newProducer(data));
-}
-
-eventHandler[events.NEW_PARTICIPANT] = (dispatch: Dispatch<any>, participant: any) => {
-    dispatch(
-        addParticipant({
-            name: participant.name,
-            id: participant.id,
-            stream: null,
-            audioEnabled: false,
-            videoEnabled: false,
-        })
-    );
-    dispatch(show(`${participant.name} has joined the meeting`));
-}
-
-eventHandler[events.PARTICIPANT_OFFLINE] = (dispatch: Dispatch<any>, participantId: string) => {
-    dispatch(removeParticipant(participantId));
-}
-
-eventHandler[events.NEW_MESSAGE] = (dispatch: Dispatch<any>, message: any) => {
-    dispatch(newMessage(message));
-}
-
-eventHandler[events.PAUSE_CONSUMER] = (dispatch: Dispatch<any>, message: any) => {
-    dispatch(pauseConsumer(message));
-}
-
-eventHandler[events.RESUME_CONSUMER] = (dispatch: Dispatch<any>, message: any) => {
-    dispatch(resumeConsumer(message));
-}
 
 const emitEventMiddleWare = (socket: Socket) => (store: any) => (next: any) => (action: any) => {
     const { dispatch } = store;
@@ -72,15 +38,47 @@ const emitEventMiddleWare = (socket: Socket) => (store: any) => (next: any) => (
     return next(action);
 }
 
-const subscribeToEventsMiddleWare = (socket: Socket) => ({ dispatch }: any) => (next: any) => (action: any) => {
-    Object.values(events).map(event => {
-        if (eventHandler[event] && !socket.hasListeners(event)) {
-            socket.on(event, (...data: any[]) => {
-                eventHandler[event](dispatch, ...data)
-            });
+const listeners = [
+    {
+        name: events.RESUME_CONSUMER,
+        callback: (dispatch: Dispatch<any>, message: any) => {
+            dispatch(resumeConsumer(message));
         }
-    });
-    return next(action);
-}
+    }, {
+        name: events.PAUSE_CONSUMER,
+        callback: (dispatch: Dispatch<any>, message: any) => {
+            dispatch(pauseConsumer(message));
+        }
+    }, {
+        name: events.NEW_MESSAGE,
+        callback: (dispatch: Dispatch<any>, message: any) => {
+            dispatch(newMessage(message));
+        }
+    }, {
+        name: events.PARTICIPANT_OFFLINE,
+        callback: (dispatch: Dispatch<any>, participantId: string) => {
+            dispatch(removeParticipant(participantId));
+        }
+    }, {
+        name: events.NEW_PARTICIPANT,
+        callback: (dispatch: Dispatch<any>, participant: any) => {
+            dispatch(
+                addParticipant({
+                    name: participant.name,
+                    id: participant.id,
+                    stream: null,
+                    audioEnabled: false,
+                    videoEnabled: false,
+                })
+            );
+            dispatch(show(`${participant.name} has joined the meeting`));
+        }
+    }, {
+        name: events.NEW_PRODUCER,
+        callback: (dispatch: Dispatch<any>, data: any) => {
+            dispatch(newProducer(data));
+        }
+    }
+];
 
-export { emitEventMiddleWare, subscribeToEventsMiddleWare };
+export { emitEventMiddleWare, listeners };
