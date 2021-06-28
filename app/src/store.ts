@@ -8,6 +8,7 @@ import {Device} from "mediasoup-client";
 import {mediasoup} from "./middlewares/mediasoup";
 import {enableMapSet} from "immer";
 import {attachListeners} from "./utils/helpers";
+import {UserMediaReducer} from "./slices/userMedia";
 
 enableMapSet();
 
@@ -17,7 +18,8 @@ const device = new Device();
 
 const reducer = {
     meeting: MeetingReducer,
-    toast: ToastReducer
+    toast: ToastReducer,
+    userMedia: UserMediaReducer,
 }
 
 const store = configureStore({
