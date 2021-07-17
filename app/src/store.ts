@@ -8,16 +8,18 @@ import {Device} from "mediasoup-client";
 import {mediasoup} from "./middlewares/mediasoup";
 import {enableMapSet} from "immer";
 import {attachListeners} from "./utils/helpers";
+import {UserMediaReducer} from "./slices/userMedia";
 
 enableMapSet();
 
-const address = process.env.SOCKET_ADDRESS || "https://meetly.goutambseervi.tech/"
+const address = process.env.SOCKET_ADDRESS || "http://localhost:3000"
 const socket = io(address);
 const device = new Device();
 
 const reducer = {
     meeting: MeetingReducer,
-    toast: ToastReducer
+    toast: ToastReducer,
+    userMedia: UserMediaReducer,
 }
 
 const store = configureStore({

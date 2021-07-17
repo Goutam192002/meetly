@@ -1,5 +1,4 @@
 import Video from "./Video";
-import React from "react";
 import {Participant} from "../interfaces/meeting";
 
 const ParticipantVideo = ({ participant, size, forceMute=false, showMuteStatus=true }: { participant: Participant, size: string, forceMute?: boolean, showMuteStatus?: boolean }) => (

@@ -1,25 +1,27 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 
-const fetchMediaDevices = createAsyncThunk('client/fetchMediaDevices', async () => {
+const fetchMediaDevices = createAsyncThunk('userMedia/fetchMediaDevices', async () => {
    const devices = await navigator.mediaDevices.enumerateDevices();
    const result = {
        "audioinput": [],
        "audiooutput": [],
        "videoinput": []
-   };
+   } as any;
    devices.forEach(device => {
        result[device.kind].push(device);
    });
-   return result;
+   return result as any;
 });
 
-const fetchMediaStream = createAsyncThunk('client/fetchMediaStream', async ({ videoDeviceId, audioDeviceId }) => {
-    return await navigator.mediaDevices.getUserMedia({
+const fetchMediaStream = createAsyncThunk('userMedia/fetchMediaStream', async (options: any) => {
+    return (await navigator.mediaDevices.getUserMedia({
         video: {
-            deviceId: videoDeviceId,
+            deviceId: options?.video?.deviceId,
         },
         audio: {
-            deviceId: audioDeviceId,
+            deviceId: options?.audio?.deviceId,
         },
-    });
+    })) as MediaStream;
 });
+
+export { fetchMediaDevices, fetchMediaStream };
