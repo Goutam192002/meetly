@@ -15,7 +15,7 @@ const getMeeting = (state: RootState) => state.meeting;
 const NewMeeting = () => {
     const [name, setName] = useState('');
 
-    let videoRef: HTMLVideoElement|null;
+    let videoRef: HTMLVideoElement|null = null;
 
     const dispatch = useDispatch();
     const meeting = useSelector(getMeeting);
@@ -34,19 +34,29 @@ const NewMeeting = () => {
     }, []);
 
     useEffect(() => {
-        const defaultVideoDeviceId = userMedia.devices["videoinput"][0]?.id;
-        const defaultAudioDeviceId = userMedia.devices["audioinput"][0]?.id;
-        dispatch(
-            fetchMediaStream({
-                video: {
-                    deviceId: defaultVideoDeviceId
-                },
-                audio: {
-                    deviceId: defaultAudioDeviceId
-                }
-            })
-        );
-    }, [userMedia.devices])
+        if (userMedia.status === 'fulfilled') {            
+            const defaultVideoDeviceId = userMedia.devices["videoinput"][0]?.deviceId;
+            const defaultAudioDeviceId = userMedia.devices["audioinput"][0]?.deviceId;
+
+            
+            dispatch(
+                fetchMediaStream({
+                    video: {
+                        deviceId: defaultVideoDeviceId
+                    },
+                    audio: {
+                        deviceId: defaultAudioDeviceId
+                    }
+                })
+            );    
+        }
+    }, [userMedia.status]);
+
+    useEffect(() => {
+        if (videoRef) {
+            videoRef.srcObject = userMedia.stream;
+        }
+    }, [userMedia.stream]);
 
     const onNameChange = (event: ChangeEvent<HTMLInputElement>) => {
         setName(event.currentTarget.value);
@@ -70,10 +80,10 @@ const NewMeeting = () => {
         <div className="container h-screen max-h-screen mx-auto px-4 py-8">
             <div className="flex flex-col h-full sm:flex-row sm:space-x-16">
                 <div className="flex-1 relative w-full max-w-screen-sm">
-                    { userMedia.stream && userMedia.streamStatus.videoEnabled ? (<video className="absolute min-w-full h-full object-cover object-center rounded-xl" ref={ref => videoRef = ref}  autoPlay={true} playsInline={true} />) : (<div className="absolute bg-black w-full h-full" />)}
+                    <video className="absolute min-w-full h-full object-cover object-center rounded-xl" ref={ref => videoRef = ref} muted={true}  autoPlay={true} playsInline={true} />
                     <div className="absolute z-50 w-full h-full flex flex-row gap-x-2 justify-center items-end py-3">
                         <button className={`rounded-full ${!userMedia.streamStatus.audioEnabled ? 'bg-white': ''} border-2 p-3 focus:outline-none`} onClick={() => {
-                           toggleAudio();
+                           dispatch(toggleAudio());
                         }}
                             disabled={userMedia.stream.getAudioTracks().length === 0}
                         >
@@ -86,7 +96,7 @@ const NewMeeting = () => {
                             }
                         </button>
                         <button className={`rounded-full ${!userMedia.streamStatus.videoEnabled ? 'bg-white': ''} border-2 p-3 focus:outline-none`} onClick={() => {
-                            toggleVideo()
+                            dispatch(toggleVideo());
                         }}
                             disabled={userMedia.stream.getVideoTracks().length === 0}
                         >

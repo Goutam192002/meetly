@@ -12,7 +12,7 @@ import {UserMediaReducer} from "./slices/userMedia";
 
 enableMapSet();
 
-const address = process.env.SOCKET_ADDRESS || "https://meetly.goutambseervi.tech/"
+const address = process.env.SOCKET_ADDRESS || "http://localhost:3000"
 const socket = io(address);
 const device = new Device();
 

@@ -8,6 +8,7 @@ import {Participant} from "../interfaces/meeting";
 import {Producer} from "mediasoup-client/lib/Producer";
 import store from "../store";
 import {Consumer} from "mediasoup-client/lib/Consumer";
+import { toggleAudio, toggleVideo } from "../slices/userMedia";
 
 let sendTransport: Transport;
 let receiveTransport: Transport;
@@ -27,10 +28,7 @@ navigator.mediaDevices.enumerateDevices().then((devices: MediaDeviceInfo[]) => {
 
 const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any) => async (action: any) => {
     const { audioEnabled, videoEnabled } = store.getState().meeting.self;
-    let stream: MediaStream|null = null;
-    if (audioEnabled || videoEnabled) {
-        stream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: audioEnabled});
-    }
+    let stream = store.getState().userMedia.stream;
 
     switch (action.type) {
         case 'meeting/joinMeeting':
@@ -122,11 +120,13 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
             break;
         case 'meeting/muteMic':
             if (audioProducer) {
+                store.dispatch(toggleAudio());
                 await pauseProducer(audioProducer, socket);
             }
             break;
         case 'meeting/unmuteMic':
             if (canProduceAudio) {
+                store.dispatch(toggleAudio());
                 if (!audioProducer) {
                     audioProducer = await sendTransport.produce({
                         track: stream!!.getAudioTracks()[0],
@@ -138,11 +138,13 @@ const mediasoup = (socket: Socket, device: Device) => (store: any) => (next: any
             break;
         case 'meeting/videoOff':
             if (videoProducer) {
+                store.dispatch(toggleVideo());
                 await pauseProducer(videoProducer, socket);
             }
             break;
         case 'meeting/videoOn':
             if (canProduceVideo) {
+                store.dispatch(toggleVideo());
                 if (!videoProducer) {
                     videoProducer = await sendTransport.produce({
                         track: stream!!.getVideoTracks()[0],
